@@ -94,17 +94,24 @@ class Ticket(models.Model):
     def __str__(self) -> str:
         return (
             f"<Ticket: {self.movie_session.movie.title} "
-            f"{self.movie_session.show_time} (row: {self.row}, seat: {self.seat})>"
+            f"{self.movie_session.show_time} "
+            f"(row: {self.row}, seat: {self.seat})>"
         )
 
-    def clean(self):
+    def clean(self) -> None:
         if (
-                not (1 <= self.seat <= self.movie_session.cinema_hall.seats_in_row)
-                or not (1 <= self.row <= self.movie_session.cinema_hall.rows)
+                not (
+                    1 <= self.seat <= (
+                        self.movie_session.cinema_hall.seats_in_row
+                    )
+                )
+                or not (
+                    1 <= self.row <= self.movie_session.cinema_hall.rows
+                )
         ):
             raise ValidationError("Invalid seat or row")
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs) -> None:
         self.full_clean()
         return super().save(*args, **kwargs)
 
