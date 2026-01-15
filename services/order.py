@@ -15,18 +15,22 @@ def create_order(
         date: datetime = None
 ) -> None:
     user = get_user_model().objects.get(username=username)
-    order = Order.objects.create(user=user, date=date)
+    order = Order.objects.create(user=user)
+    if date:
+        order.created_at = date
+    order.save()
 
     for ticket in tickets:
-        Ticket.objects.create(
-            movie_session=ticket["movie_session"],
+        ticket_obj = Ticket.objects.create(
+            movie_session_id=ticket["movie_session"],
             order_id=order.id,
             row=ticket["row"],
             seat=ticket["seat"],
         )
+        ticket_obj.save()
 
 
-def get_orders(username: str = None) -> QuerySet:
+def get_orders(username: str = None) -> QuerySet[Order]:
     if username:
         return Order.objects.filter(user__username=username)
     else:
